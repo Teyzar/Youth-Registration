@@ -46,18 +46,21 @@ const Header = (props: Props) => {
               cursor: 'pointer'
             }}
           >
-            TLLC Youth
+            CrossBearers Youth
           </Typography>
 
           <Box sx={{ display: 'flex', gap: 4}}>
             <Button color="inherit" href="/">
               Home
             </Button>
-            <Button color="inherit" href="/register">
+            <Button color="inherit" href="/registration">
               Register
             </Button>
             <Button color="inherit" href="/contact">
               Contact
+            </Button>
+            <Button color="inherit" href="/api/logout">
+              Logout
             </Button>
           </Box>
         </Toolbar>

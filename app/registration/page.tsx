@@ -5,7 +5,7 @@ import { useState } from 'react';
 import RegistrationFormData from "@/types/register.types";
 
 async function handleRegister(formData: RegistrationFormData) {
-    const response = await fetch('/api/register', {
+    const response = await fetch('/api/registration', {
         method: 'POST',
         body: JSON.stringify(formData),
     });
@@ -80,20 +80,8 @@ const Register = () => {
                 alignItems: 'center',
                 p: 6,
                 minHeight: '100vh',
-                width: '100%',
                 paddingTop: '100px',
             }}>
-                <Typography sx={{
-                    fontSize: '2.8rem',
-                    fontWeight: 'bold',
-                    color: 'primary.main',
-                    textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
-                    alignSelf: 'center',
-                    mb: 5
-                }}>
-                    Youth Registration
-                </Typography>
-                
                 <Paper elevation={5} sx={{ 
                     p: 4, 
                     width: '100%', 
@@ -104,6 +92,16 @@ const Register = () => {
                     border: '1px solid rgba(255,255,255,0.2)',
                     background: 'rgba(255,255,255,0.9)',
                 }}>
+                    <Typography sx={{
+                        fontSize: '1.5rem',
+                        fontWeight: 'bold',
+                        color: 'primary.main',
+                        textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
+                        alignSelf: 'start',
+                        mb: 5
+                    }}>
+                        Youth Registration
+                    </Typography>
                     <Box component="form" onSubmit={handleSubmit(handleFormSubmit)}>
                         <Grid2 container spacing={3}>
                             <Grid2 size={{xs: 12}}>
