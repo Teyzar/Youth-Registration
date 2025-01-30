@@ -9,10 +9,10 @@ import {
   Box,
 } from '@mui/material'
 import { styled } from '@mui/material/styles'
-import { LoginFormData } from '@/types/login.types'
-import { useForm } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { useState } from 'react';
 import { useRouter } from 'next/navigation'
+import { LoginFormData } from '@/types/login.types';
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginTop: theme.spacing(8),
@@ -35,20 +35,19 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
-  const handleFormSubmit = async (formData: LoginFormData) => {
-
+  const handleFormSubmit: SubmitHandler<LoginFormData> = async (formData) => {
     setIsSubmitting(true);
     try {
-        const response = await handleLogin(formData);
-        if (response.message === "Login successful") {
-            router.push('/campers');
-        }
+      const response = await handleLogin(formData);
+      if (response.message === "Login successful") {
+        router.refresh();
+      }
     } catch (error) {
-        console.error(error);
+      console.error(error);
     } finally {
-        setIsSubmitting(false);
+      setIsSubmitting(false);
     }
-}
+  };
 
   return (
     <Box>

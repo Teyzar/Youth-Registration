@@ -6,7 +6,7 @@ export default async function middleware(request: NextRequest) {
     const token = request.cookies.get('token')?.value
 
     // Protected routes that require authentication
-    const protectedRoutes = ['/campers', '/registration', '/']
+    const protectedRoutes = ['/registration', '/']
     const isProtectedRoute = protectedRoutes.some(route => 
         request.nextUrl.pathname.startsWith(route)
     )
@@ -17,9 +17,9 @@ export default async function middleware(request: NextRequest) {
     }
 
     // Redirect to /campers if user is logged in and tries to access root path
-    if (request.nextUrl.pathname === '/' && token) {
-        return NextResponse.redirect(new URL('/campers', request.url))
-    }
+    // if (request.nextUrl.pathname === '/' && token) {
+    //     return NextResponse.redirect(new URL('/', request.url))
+    // }
 
     // Allow the request to continue
     return NextResponse.next()
@@ -28,7 +28,6 @@ export default async function middleware(request: NextRequest) {
 // Configure which routes should be handled by this middleware
 export const config = {
     matcher: [
-        '/campers/:path*',
         '/registration/:path*',
     ]
 }
