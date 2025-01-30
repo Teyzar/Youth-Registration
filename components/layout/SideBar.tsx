@@ -10,6 +10,7 @@ import {
   Paper,
 } from '@mui/material';
 import { ContactPage, Logout, Home, Person } from '@mui/icons-material';
+import { useRouter } from 'next/navigation';
 
 interface Props {
   isAuthenticated: boolean;
@@ -17,6 +18,7 @@ interface Props {
 
 const SideBar = ({ isAuthenticated }: Props) => {
   const theme = useTheme();
+  const router = useRouter();
 
   if (!isAuthenticated) {
     return null;
@@ -66,8 +68,13 @@ const SideBar = ({ isAuthenticated }: Props) => {
         </List>
         <List sx={{ marginTop: 'auto' }}>
           <ListItem
-            component="a"
-            href={logoutItem.href}
+            component="button"
+            onClick={ async () => {
+              const res = await fetch('/api/logout');
+              if (res.ok) {
+                router.refresh();
+              }
+            }}
             sx={{
               '&:hover': {
                 backgroundColor: 'action.hover',

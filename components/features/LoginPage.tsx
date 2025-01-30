@@ -33,6 +33,7 @@ async function handleLogin(formData: LoginFormData) {
 export default function LoginPage() {
   const { register, handleSubmit } = useForm<LoginFormData>();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<LoginFormData>();
   const router = useRouter();
 
   const handleFormSubmit: SubmitHandler<LoginFormData> = async (formData) => {
@@ -40,10 +41,19 @@ export default function LoginPage() {
     try {
       const response = await handleLogin(formData);
       if (response.message === "Login successful") {
+        router.push('/');
         router.refresh();
+      } else {
+        setErrors({
+          email: response.message,
+          password: response.message
+        });
       }
-    } catch (error) {
-      console.error(error);
+    } catch {
+      setErrors({
+        email: 'An error occurred during login',
+        password: 'An error occurred during login'
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -63,6 +73,8 @@ export default function LoginPage() {
     
           <TextField
               fullWidth
+              error={!!errors?.email}
+              helperText={errors?.email}
               label="Email"
               variant="outlined"
               required
@@ -72,6 +84,8 @@ export default function LoginPage() {
           />
           <TextField
             fullWidth
+            error={!!errors?.password}
+            helperText={errors?.password}
             type="password"
             label="Password"
             variant="outlined"

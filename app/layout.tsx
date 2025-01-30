@@ -65,7 +65,10 @@ export default async function RootLayout({
                   justifyContent: 'center',
                   alignItems: 'center',
                   width: '100%',
-                  ml: { md: '250px' },
+                  padding: '20px',
+                  maxWidth: '1200px',
+                  margin: '0 auto',
+                  overflow: 'hidden'
                 }}
               >
                 {children}

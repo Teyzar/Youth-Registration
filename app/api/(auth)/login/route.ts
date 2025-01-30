@@ -23,8 +23,9 @@ export async function POST(req: NextRequest) {
             });
             return response;
         }
+
+        return NextResponse.json({ message: response.error?.message }, { status: 400 });
         
-        return NextResponse.json({ message: "Login failed" }, { status: 400 });
     } catch (error) {
         return NextResponse.json({ message: error }, { status: 400 });
     }

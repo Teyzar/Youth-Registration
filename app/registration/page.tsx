@@ -79,14 +79,12 @@ const Register = () => {
                 flexDirection: 'column',
                 alignItems: 'center',
                 p: 6,
-                minHeight: '100vh',
+                // minHeight: '100vh',
                 paddingTop: '100px',
             }}>
                 <Paper elevation={5} sx={{ 
                     p: 4, 
-                    width: '100%', 
-                    maxWidth: '800px', 
-                    minWidth: '320px',
+                    width: '100%',
                     borderRadius: 3,
                     boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
                     border: '1px solid rgba(255,255,255,0.2)',
