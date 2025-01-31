@@ -80,7 +80,6 @@ const Register = () => {
                 alignItems: 'center',
                 p: 6,
                 // minHeight: '100vh',
-                paddingTop: '100px',
             }}>
                 <Paper elevation={5} sx={{ 
                     p: 4, 

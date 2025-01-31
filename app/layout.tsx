@@ -63,11 +63,11 @@ export default async function RootLayout({
                   flex: 1,
                   display: 'flex',
                   justifyContent: 'center',
-                  alignItems: 'center',
+                  alignItems: 'start',
                   width: '100%',
-                  padding: '20px',
                   maxWidth: '1200px',
                   margin: '0 auto',
+                  marginTop: '100px',
                   overflow: 'hidden'
                 }}
               >
