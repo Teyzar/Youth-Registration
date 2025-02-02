@@ -56,22 +56,34 @@ export default async function RootLayout({
                 position: 'relative',
               }}
             >
-              <SideBar isAuthenticated={!!token} />
-              <Box
-                component="main"
-                sx={{
-                  flex: 1,
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'start',
-                  width: '100%',
-                  maxWidth: '1200px',
-                  margin: '0 auto',
-                  marginTop: '100px',
-                  overflow: 'hidden'
-                }}
-              >
-                {children}
+              <Box sx={{ display: 'flex', width: '100%' }}>
+                <SideBar isAuthenticated={!!token} />
+                <Box
+                  component="main"
+                  sx={{
+                    flex: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'flex-start', 
+                    alignItems: 'center',
+                    width: '100%',
+                    maxWidth: '1400px',
+                    margin: '0 auto',
+                    marginTop: '100px',
+                    overflow: 'hidden',
+                    gap: 2,
+                    padding: 3,
+                    marginLeft: { xs: 0, md: '250px' },
+                    transition: 'margin-left 0.3s ease',
+                    position: 'relative',
+                    '& > *': {
+                      maxWidth: '100%',
+                      boxSizing: 'border-box'
+                    }
+                  }}
+                >
+                  {children}
+                </Box>
               </Box>
             </Box>
           </Box>

@@ -13,7 +13,7 @@ export async function GET() {
         campers.push({
             id: item.id,
             name: item.name,
-            age: item.age,
+            age: new Date().getFullYear() - new Date(item.birthdate).getFullYear(),
             gender: item.gender,
             contact_number: item.contact_number,
             payment: payment,
@@ -21,6 +21,7 @@ export async function GET() {
             tshirt_paid: item.tshirt_paid,
             extra: item.extra,
             remarks: item.remarks,
+            status: payment >= 1500 ? 'FP' : 'DP',
         });
     });
 

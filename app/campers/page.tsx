@@ -24,34 +24,7 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import { visuallyHidden } from '@mui/utils';
 import { useEffect } from 'react';
 import TableData from '@/types/table.interface';
-
-// function createData(
-//   id: number,
-//   name: string,
-//   age: number,
-//   gender: string,
-//   contact_number: string,
-//   payment: number,
-//   tshirt_paid: boolean,
-//   extra: number,
-//   remarks: string,
-//   payment_date: Date,
-// ): TableData {
-//   return {
-//     id,
-//     name,
-//     age,
-//     gender,
-//     contact_number,
-//     payment,
-//     tshirt_paid,
-//     extra,
-//     remarks,
-//     payment_date,
-//   };
-// }
-
-const rows: TableData[] = [];
+import CircularProgress from '@mui/material/CircularProgress';
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -138,6 +111,12 @@ const headCells: readonly HeadCell[] = [
     numeric: true,
     disablePadding: false,
     label: 'Payment Date',
+  },
+  {
+    id: 'status',
+    numeric: true,
+    disablePadding: false,
+    label: 'Status',
   },
 ];
 
@@ -252,7 +231,9 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
 }
 
 async function fetchCampers() {
-  const response = await fetch('/api/campers');
+  const response = await fetch('/api/campers', {
+    cache: 'no-store', // or { next: { revalidate: 60 } } for ISR
+  });
   const data = await response.json();
   return data;
 }
@@ -265,9 +246,12 @@ const Campers = () => {
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [campers, setCampers] = React.useState<TableData[]>([]);
+  const [loading, setLoading] = React.useState(true);
 
   useEffect(() => {
-    fetchCampers().then((data) => setCampers(data));
+    fetchCampers()
+      .then((data) => setCampers(data))
+      .finally(() => setLoading(false));
   }, []);
 
   console.log(campers);
@@ -283,7 +267,7 @@ const Campers = () => {
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      const newSelected = rows.map((n) => n.id);
+      const newSelected = campers.map((n) => n.id);
       setSelected(newSelected);
       return;
     }
@@ -335,8 +319,14 @@ const Campers = () => {
   );
 
   return (
-    <Box sx={{ width: '100%' }}>
-      <Paper sx={{ width: '100%', mb: 2 }}>
+    <Box sx={{ 
+      display: 'flex',
+      flexDirection: 'column',
+      width: '100%',
+    }}>
+      <Paper sx={{ 
+        mb: 2,
+      }}>
         <EnhancedTableToolbar numSelected={selected.length} />
         <TableContainer>
           <Table
@@ -353,49 +343,68 @@ const Campers = () => {
               rowCount={campers.length}
             />
             <TableBody>
-              {visibleRows.map((row, index) => {
-                const isItemSelected = selected.includes(row.id);
-                const labelId = `enhanced-table-checkbox-${index}`;
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={11} align="center" sx={{ py: 3 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                      <CircularProgress size={25} />
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              ) : campers.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={11} align="center" sx={{ py: 3 }}>
+                    <Typography variant="body1">
+                      No campers found
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                visibleRows.map((row, index) => {
+                  const isItemSelected = selected.includes(row.id);
+                  const labelId = `enhanced-table-checkbox-${index}`;
 
-                return (
-                  <TableRow
-                    hover
-                    onClick={(event) => handleClick(event, row.id)}
-                    role="checkbox"
-                    aria-checked={isItemSelected}
-                    tabIndex={-1}
-                    key={row.id}
-                    selected={isItemSelected}
-                    sx={{ cursor: 'pointer' }}
-                  >
-                    <TableCell padding="checkbox">
-                      <Checkbox
-                        color="primary"
-                        checked={isItemSelected}
-                        inputProps={{
-                          'aria-labelledby': labelId,
-                        }}
-                      />
-                    </TableCell>
-                    <TableCell
-                      component="th"
-                      id={labelId}
-                      scope="row"
-                      padding="none"
+                  return (
+                    <TableRow
+                      hover
+                      onClick={(event) => handleClick(event, row.id)}
+                      role="checkbox"
+                      aria-checked={isItemSelected}
+                      tabIndex={-1}
+                      key={row.id}
+                      selected={isItemSelected}
+                      sx={{ cursor: 'pointer' }}
                     >
-                      {row.name}
-                    </TableCell>
-                    <TableCell align="right">{row.age}</TableCell>
-                    <TableCell align="right">{row.gender}</TableCell>
-                    <TableCell align="right">{row.contact_number}</TableCell>
-                    <TableCell align="right">{row.payment}</TableCell>
-                    <TableCell align="right">{row.tshirt_paid}</TableCell>
-                    <TableCell align="right">{row.extra}</TableCell>
-                    <TableCell align="right">{row.remarks}</TableCell>
-                    <TableCell align="right">{row.payment_date ? new Date(row.payment_date).toLocaleDateString() : ''}</TableCell>
-                  </TableRow>
-                );
-              })}
+                      <TableCell padding="checkbox">
+                        <Checkbox
+                          color="primary"
+                          checked={isItemSelected}
+                          inputProps={{
+                            'aria-labelledby': labelId,
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell
+                        component="th"
+                        id={labelId}
+                        scope="row"
+                        padding="none"
+                      >
+                        {row.name}
+                      </TableCell>
+                      <TableCell align="right">{row.age}</TableCell>
+                      <TableCell align="right">{row.gender.charAt(0).toUpperCase() + row.gender.slice(1)}</TableCell>
+                      <TableCell align="right">{row.contact_number}</TableCell>
+                      <TableCell align="right" sx={{ color: row.status === 'FP' ? 'green' : 'red' }}>{row.payment}</TableCell>
+                      <TableCell align="right" sx={{ color: row.tshirt_paid ? 'green' : 'red' }}>{row.tshirt_paid ? 'Yes' : 'No'}</TableCell>
+                      <TableCell align="right" sx={{ color: row.extra > 0 ? 'green' : '', fontWeight: 'bold' }}>{row.extra}</TableCell>
+                      <TableCell align="right">{row.remarks}</TableCell>
+                      <TableCell align="right">{row.payment_date ? new Date(row.payment_date).toLocaleDateString() : ''}</TableCell>
+                      <TableCell align="right" sx={{ color: row.status === 'FP' ? 'green' : 'red' }}>{row.status}</TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
               {emptyRows > 0 && (
                 <TableRow
                   style={{

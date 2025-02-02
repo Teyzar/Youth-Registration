@@ -9,4 +9,5 @@ export default interface TableData {
     extra: number;
     remarks: string;
     payment_date: Date;
+    status: string;
 }

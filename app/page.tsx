@@ -1,12 +1,12 @@
 import { cookies } from "next/headers";
-import Campers from "@/components/features/Campers";
+import HomePage from "@/components/features/Home";
 import LoginPage from "@/components/features/LoginPage";
 
 export default async function Home() {
   const token = (await cookies()).get('token')?.value;
 
   if (token) {
-    return <Campers />
+    return <HomePage />
   }
 
   return <LoginPage />

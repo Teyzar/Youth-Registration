@@ -9,7 +9,7 @@ import {
   useTheme,
   Paper,
 } from '@mui/material';
-import { ContactPage, Logout, Home, Person } from '@mui/icons-material';
+import { ContactPage, Logout, Home, People, AppRegistrationRounded } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 
 interface Props {
@@ -26,7 +26,8 @@ const SideBar = ({ isAuthenticated }: Props) => {
 
   const menuItems = [
     { icon: <Home />, text: 'Home', href: '/' },
-    { icon: <Person />, text: 'Register', href: '/registration' },
+    { icon: <People  />, text: 'Campers', href: '/campers' },
+    { icon: <AppRegistrationRounded />, text: 'Register', href: '/registration' },
     { icon: <ContactPage />, text: 'Contact', href: '/contact' },
   ];
 

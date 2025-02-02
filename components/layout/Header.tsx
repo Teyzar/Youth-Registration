@@ -40,6 +40,7 @@ const Header = ({isAuthenticated, ...props}: Props) => {
 
   const menuItems = [
     { icon: <Home />, text: 'Home', href: '/' },
+    { icon: <Home />, text: 'Campers', href: '/campers' },
     { icon: <Person />, text: 'Register', href: '/registration' },
     { icon: <ContactPage />, text: 'Contact', href: '/contact' },
   ];

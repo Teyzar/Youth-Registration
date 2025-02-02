@@ -6,7 +6,7 @@ export default async function middleware(request: NextRequest) {
     const token = request.cookies.get('token')?.value
 
     // Protected routes that require authentication
-    const protectedRoutes = ['/registration', '/']
+    const protectedRoutes = ['/registration', '/', '/campers']
     const isProtectedRoute = protectedRoutes.some(route => 
         request.nextUrl.pathname.startsWith(route)
     )
@@ -29,5 +29,6 @@ export default async function middleware(request: NextRequest) {
 export const config = {
     matcher: [
         '/registration/:path*',
+        '/campers/:path*',
     ]
 }
