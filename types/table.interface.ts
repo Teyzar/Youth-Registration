@@ -8,6 +8,7 @@ export default interface TableData {
     tshirt_paid: boolean;
     extra: number;
     remarks: string;
-    payment_date: Date;
+    dp_date: Date;
+    fp_date: Date;
     status: string;
 }

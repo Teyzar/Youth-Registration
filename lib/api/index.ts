@@ -1,0 +1,1 @@
+export { getCampers, deleteCamper } from './data';

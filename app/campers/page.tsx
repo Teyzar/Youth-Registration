@@ -25,6 +25,7 @@ import { visuallyHidden } from '@mui/utils';
 import { useEffect } from 'react';
 import TableData from '@/types/table.interface';
 import CircularProgress from '@mui/material/CircularProgress';
+import { getCampers, deleteCamper } from '@/lib/api';
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -80,7 +81,7 @@ const headCells: readonly HeadCell[] = [
     id: 'contact_number',
     numeric: true,
     disablePadding: false,
-    label: 'Contact Number',
+    label: 'Contact #',
   },
   {
     id: 'payment',
@@ -107,10 +108,16 @@ const headCells: readonly HeadCell[] = [
     label: 'Remarks',
   },
   {
-    id: 'payment_date',
+    id: 'dp_date',
     numeric: true,
     disablePadding: false,
-    label: 'Payment Date',
+    label: 'DP Date',
+  },
+  {
+    id: 'fp_date',
+    numeric: true,
+    disablePadding: false,
+    label: 'FP Date',
   },
   {
     id: 'status',
@@ -215,7 +222,7 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
       )}
       {numSelected > 0 ? (
         <Tooltip title="Delete">
-          <IconButton>
+          <IconButton onClick={() => deleteCamper(numSelected.toString())}>
             <DeleteIcon />
           </IconButton>
         </Tooltip>
@@ -230,14 +237,6 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
   );
 }
 
-async function fetchCampers() {
-  const response = await fetch('/api/campers', {
-    cache: 'no-store', // or { next: { revalidate: 60 } } for ISR
-  });
-  const data = await response.json();
-  return data;
-}
-
 const Campers = () => {
   const [order, setOrder] = React.useState<Order>('asc');
   const [orderBy, setOrderBy] = React.useState<keyof TableData>('name');
@@ -249,12 +248,10 @@ const Campers = () => {
   const [loading, setLoading] = React.useState(true);
 
   useEffect(() => {
-    fetchCampers()
+    getCampers()
       .then((data) => setCampers(data))
       .finally(() => setLoading(false));
   }, []);
-
-  console.log(campers);
 
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,
@@ -319,7 +316,7 @@ const Campers = () => {
   );
 
   return (
-    <Box sx={{ 
+    <Box sx={{
       display: 'flex',
       flexDirection: 'column',
       width: '100%',
@@ -399,7 +396,8 @@ const Campers = () => {
                       <TableCell align="right" sx={{ color: row.tshirt_paid ? 'green' : 'red' }}>{row.tshirt_paid ? 'Yes' : 'No'}</TableCell>
                       <TableCell align="right" sx={{ color: row.extra > 0 ? 'green' : '', fontWeight: 'bold' }}>{row.extra}</TableCell>
                       <TableCell align="right">{row.remarks}</TableCell>
-                      <TableCell align="right">{row.payment_date ? new Date(row.payment_date).toLocaleDateString() : ''}</TableCell>
+                      <TableCell align="right">{row.dp_date ? new Date(row.dp_date).toLocaleDateString() : ''}</TableCell>
+                      <TableCell align="right">{row.fp_date ? new Date(row.fp_date).toLocaleDateString() : ''}</TableCell>
                       <TableCell align="right" sx={{ color: row.status === 'FP' ? 'green' : 'red' }}>{row.status}</TableCell>
                     </TableRow>
                   );

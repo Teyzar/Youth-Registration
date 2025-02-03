@@ -9,7 +9,8 @@ export async function GET() {
 
     data?.forEach(async (item) => {
         const payment = item.dp_amount > 0 ? item.dp_amount : item.fp_amount;
-        const payment_date = item.dp_date > item.fp_date ? item.dp_date : item.fp_date;
+        const dp_date = item.dp_date;
+        const fp_date = item.fp_date;
         campers.push({
             id: item.id,
             name: item.name,
@@ -17,7 +18,8 @@ export async function GET() {
             gender: item.gender,
             contact_number: item.contact_number,
             payment: payment,
-            payment_date: payment_date,
+            dp_date: dp_date,
+            fp_date: fp_date,
             tshirt_paid: item.tshirt_paid,
             extra: item.extra,
             remarks: item.remarks,

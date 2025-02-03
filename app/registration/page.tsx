@@ -78,16 +78,14 @@ const Register = () => {
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                p: 6,
                 // minHeight: '100vh',
             }}>
-                <Paper elevation={5} sx={{ 
+                <Paper elevation={1} sx={{ 
                     p: 4, 
                     width: '100%',
                     borderRadius: 3,
                     boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
                     border: '1px solid rgba(255,255,255,0.2)',
-                    background: 'rgba(255,255,255,0.9)',
                 }}>
                     <Typography sx={{
                         fontSize: '1.5rem',
