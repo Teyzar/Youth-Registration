@@ -1,8 +1,9 @@
 'use client'
-import { Box, Typography, TextField, FormControl, InputLabel, Select, MenuItem, Grid2, Paper, Button, CircularProgress, Snackbar, Alert } from "@mui/material"
+import { Box, Typography, TextField, FormControl, InputLabel, Select, MenuItem, Grid2, Paper, Button, CircularProgress } from "@mui/material"
 import { useForm } from "react-hook-form";
 import { useState } from 'react';
 import RegistrationFormData from "@/types/register.types";
+import SnackBar from "@/components/common/SnackBar";
 
 async function handleRegister(formData: RegistrationFormData) {
     const response = await fetch('/api/registration', {
@@ -60,20 +61,7 @@ const Register = () => {
 
     return (
         <>
-            <Snackbar 
-                open={notification.open} 
-                autoHideDuration={6000} 
-                onClose={handleCloseNotification}
-                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-            >
-                <Alert 
-                    onClose={handleCloseNotification} 
-                    severity={notification.severity}
-                    variant="filled"
-                >
-                    {notification.message}
-                </Alert>
-            </Snackbar>
+            <SnackBar notification={notification} handleCloseNotification={handleCloseNotification}/>
             <Box sx={{
                 display: 'flex',
                 flexDirection: 'column',

@@ -20,12 +20,23 @@ import Tooltip from '@mui/material/Tooltip';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
 import DeleteIcon from '@mui/icons-material/Delete';
+import SaveIcon from '@mui/icons-material/Save';
+import EditIcon from '@mui/icons-material/Edit';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { visuallyHidden } from '@mui/utils';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import TableData from '@/types/table.interface';
 import CircularProgress from '@mui/material/CircularProgress';
-import { getCampers, deleteCamper } from '@/lib/api';
+import { getCampers, deleteCampers, updateCamper } from '@/lib/api';
+import SnackBar from '@/components/common/SnackBar';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import MenuItem from '@mui/material/MenuItem';
+import RegistrationFormData from '@/types/register.types';
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -183,11 +194,18 @@ function EnhancedTableHead(props: EnhancedTableProps) {
     </TableHead>
   );
 }
+
 interface EnhancedTableToolbarProps {
   numSelected: number;
+  selectedIds: string[];
+  setNotification: (notification: { open: boolean; message: string; severity: 'success' | 'error' }) => void;
+  onDelete: () => void;
+  onEdit: () => void;
 }
+
 function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
-  const { numSelected } = props;
+  const { numSelected, selectedIds, setNotification, onDelete, onEdit } = props;
+  
   return (
     <Toolbar
       sx={[
@@ -202,14 +220,39 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
       ]}
     >
       {numSelected > 0 ? (
-        <Typography
-          sx={{ flex: '1 1 100%' }}
-          color="inherit"
-          variant="subtitle1"
-          component="div"
-        >
-          {numSelected} selected
-        </Typography>
+        <>
+          <Typography
+            sx={{ flex: '1 1 100%' }}
+            color="inherit"
+            variant="subtitle1"
+            component="div"
+          >
+            {numSelected} selected
+          </Typography>
+          <Tooltip title="Edit">
+            <IconButton 
+              onClick={onEdit}
+              disabled={numSelected !== 1}
+            >
+              <EditIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Delete">
+            <IconButton onClick={async () => {
+              const response = await deleteCampers(selectedIds);
+              if (response.status === 200) {
+                setNotification({
+                  open: true,
+                  message: response.message,
+                  severity: 'success'
+                });
+                onDelete();
+              }
+            }}>
+              <DeleteIcon />
+            </IconButton>
+          </Tooltip>
+        </>
       ) : (
         <Typography
           sx={{ flex: '1 1 100%' }}
@@ -221,9 +264,9 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
         </Typography>
       )}
       {numSelected > 0 ? (
-        <Tooltip title="Delete">
-          <IconButton onClick={() => deleteCamper(numSelected.toString())}>
-            <DeleteIcon />
+        <Tooltip title="Filter list">
+          <IconButton>
+            <FilterListIcon />
           </IconButton>
         </Tooltip>
       ) : (
@@ -246,11 +289,34 @@ const Campers = () => {
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [campers, setCampers] = React.useState<TableData[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [notification, setNotification] = useState({
+    open: false,
+    message: '',
+    severity: 'success' as 'success' | 'error'
+  });
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingCamper, setEditingCamper] = useState<TableData | null>(null);
+
+  const fetchCampers = async () => {
+    try {
+      setLoading(true);
+      const data = await getCampers();
+      setCampers(data);
+    } catch (error) {
+      setNotification({
+        open: true,
+        message: 'Failed to fetch campers. Please try again.',
+        severity: 'error'
+      });
+      console.error(error);
+    } finally {
+      setLoading(false);
+      setSelected([]);
+    }
+  };
 
   useEffect(() => {
-    getCampers()
-      .then((data) => setCampers(data))
-      .finally(() => setLoading(false));
+    fetchCampers();
   }, []);
 
   const handleRequestSort = (
@@ -315,16 +381,62 @@ const Campers = () => {
     [order, orderBy, page, rowsPerPage, campers],
   );
 
+  const handleCloseNotification = () => {
+      setNotification(prev => ({ ...prev, open: false }));
+  };
+
+  const handleEditClick = () => {
+    if (selected.length === 1) {
+      const camperToEdit = campers.find(camper => camper.id === selected[0]);
+      setEditingCamper(camperToEdit || null);
+      setEditModalOpen(true);
+    }
+  };
+
+  const handleEditClose = () => {
+    setEditModalOpen(false);
+    setEditingCamper(null);
+  };
+
+  const handleEditSave = async (id: string, data: RegistrationFormData) => {
+    // TODO: Implement your edit API call here
+    try {
+      const response = await updateCamper(id, data);
+      if (response.status === 200) {
+        setNotification({
+          open: true,
+          message: 'Camper updated successfully',
+          severity: 'success'
+        });
+        fetchCampers();
+      }
+    } catch (error) {
+      setNotification({
+        open: true,
+        message: `sadsss`,
+        severity: 'error'
+      });
+    }
+    handleEditClose();
+  };
+
   return (
     <Box sx={{
       display: 'flex',
       flexDirection: 'column',
       width: '100%',
     }}>
+      <SnackBar notification={notification} handleCloseNotification={handleCloseNotification}/>
       <Paper sx={{ 
         mb: 2,
       }}>
-        <EnhancedTableToolbar numSelected={selected.length} />
+        <EnhancedTableToolbar 
+          numSelected={selected.length} 
+          selectedIds={selected.map(id => id.toString())} 
+          setNotification={setNotification} 
+          onDelete={fetchCampers}
+          onEdit={handleEditClick}
+        />
         <TableContainer>
           <Table
             sx={{ minWidth: 750 }}
@@ -429,6 +541,100 @@ const Campers = () => {
         control={<Switch checked={dense} onChange={handleChangeDense} />}
         label="Dense padding"
       />
+
+      <Dialog open={editModalOpen} onClose={handleEditClose} fullWidth maxWidth="md">
+        <DialogTitle>Edit Camper</DialogTitle>
+        <DialogContent>
+          {editingCamper && (
+            <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <TextField
+                label="Name"
+                required
+                fullWidth
+                value={editingCamper.name}
+                onChange={(e) => setEditingCamper({ ...editingCamper, name: e.target.value })}
+              />
+              <TextField
+                label="Age"
+                required
+                type="number"
+                fullWidth
+                value={editingCamper.age}
+                onChange={(e) => setEditingCamper({ ...editingCamper, age: parseInt(e.target.value) })}
+              />
+              <TextField
+                label="Gender"
+                required
+                select
+                fullWidth
+                value={editingCamper.gender}
+                onChange={(e) => setEditingCamper({ ...editingCamper, gender: e.target.value })}
+              >
+                <MenuItem value="male">Male</MenuItem>
+                <MenuItem value="female">Female</MenuItem>
+              </TextField>
+              <TextField
+                label="Contact Number"
+                required
+                fullWidth
+                value={editingCamper.contact_number}
+                onChange={(e) => setEditingCamper({ ...editingCamper, contact_number: e.target.value })}
+              />
+              <TextField
+                label="Payment Status"
+                required
+                select
+                fullWidth
+                value={editingCamper.status}
+                onChange={(e) => setEditingCamper({ ...editingCamper, status: e.target.value })}
+              >
+                <MenuItem value="DP">Downpayment</MenuItem>
+                <MenuItem value="FP">Full Payment</MenuItem>
+              </TextField>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={editingCamper.tshirt_paid}
+                    onChange={(e) => setEditingCamper({ ...editingCamper, tshirt_paid: e.target.checked })}
+                  />
+                }
+                label="T-Shirt Paid"
+              />
+              <TextField
+                label="Extra Amount"
+                type="number"
+                fullWidth
+                value={editingCamper.extra || 0}
+                onChange={(e) => setEditingCamper({ ...editingCamper, extra: parseInt(e.target.value) })}
+              />
+              <TextField
+                label="Remarks"
+                fullWidth
+                multiline
+                rows={3}
+                value={editingCamper.remarks}
+                onChange={(e) => setEditingCamper({ ...editingCamper, remarks: e.target.value })}
+              />
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleEditClose} color="error">Cancel</Button>
+          <Button 
+            onClick={() => {
+              if (editingCamper?.id) {
+                handleEditSave(editingCamper.id.toString(), editingCamper);
+              }
+            }}
+            variant="contained" 
+            color="success"
+            startIcon={<SaveIcon />}
+            disabled={!editingCamper?.id}
+          >
+            Save Changes
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

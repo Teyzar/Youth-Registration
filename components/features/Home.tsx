@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Grid, Card, CardContent, Typography, Skeleton } from "@mui/material";
+import { Box, Grid2, Card, CardContent, Typography, Skeleton } from "@mui/material";
 import { motion } from "framer-motion";
 import PeopleIcon from '@mui/icons-material/People';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
@@ -37,11 +37,11 @@ const Home = () => {
     return (
         <Box sx={{width: '100%'}}>
             <Typography variant="h4" sx={{ mb: 4 }}>Dashboard Overview</Typography>
-            <Grid container spacing={4}>
+            <Grid2 container spacing={4}>
                 {loading ? (
                     // Skeleton loading state
                     [...Array(5)].map((_, index) => (
-                        <Grid item xs={12} sm={6} md={3} key={index}>
+                        <Grid2 size={{xs: 12, sm: 6, md: 3}} key={index}>
                             <Card>
                                 <CardContent>
                                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -53,11 +53,11 @@ const Home = () => {
                                     </Box>
                                 </CardContent>
                             </Card>
-                        </Grid>
+                        </Grid2>
                     ))
                 ) : (
                     stats.map((stat, index) => (
-                        <Grid item xs={12} sm={6} md={3} key={index}>
+                        <Grid2 size={{xs: 12, sm: 6, md: 3}} key={index}>
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -90,10 +90,10 @@ const Home = () => {
                                     </CardContent>
                                 </Card>
                             </motion.div>
-                        </Grid>
+                        </Grid2>
                     ))
                 )}
-            </Grid>
+            </Grid2>
         </Box>
     );
 }
