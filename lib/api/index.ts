@@ -1,1 +1,1 @@
-export { getCampers, deleteCampers, updateCamper } from './data';
+export { getCampers, deleteCampers, registerCamper, updateCamper } from './data';

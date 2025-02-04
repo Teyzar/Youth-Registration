@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import supabase from "@/lib/supabase";
-import TableData from "@/types/table.interface";
+import { TableData } from "@/types";
 
 export async function GET() {
     const { data, error } = await supabase.from('youth').select('*');

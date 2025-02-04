@@ -2,17 +2,9 @@
 import { Box, Typography, TextField, FormControl, InputLabel, Select, MenuItem, Grid2, Paper, Button, CircularProgress } from "@mui/material"
 import { useForm } from "react-hook-form";
 import { useState } from 'react';
-import RegistrationFormData from "@/types/register.types";
+import { RegistrationFormData } from "@/types";
 import SnackBar from "@/components/common/SnackBar";
-
-async function handleRegister(formData: RegistrationFormData) {
-    const response = await fetch('/api/registration', {
-        method: 'POST',
-        body: JSON.stringify(formData),
-    });
-
-    return await response.json();
-}
+import { registerCamper } from "@/lib/api/data";
 
 const Register = () => {
 
@@ -31,9 +23,9 @@ const Register = () => {
     const handleFormSubmit = async (formData: RegistrationFormData) => {
         setIsSubmitting(true);
         try {
-            const response = await handleRegister(formData);
+            const response = await registerCamper(formData, 'POST');
             console.log(response)
-            if (response.status === 201) {
+            if (response.status === 200) {
                 reset(); // Reset form state
                 setValue('gender', '');
                 setValue('tshirt_paid', null);

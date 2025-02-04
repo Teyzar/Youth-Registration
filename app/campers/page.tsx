@@ -1,42 +1,25 @@
 'use client'
 
 import * as React from 'react';
-import { alpha } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
-import TableSortLabel from '@mui/material/TableSortLabel';
-import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import Checkbox from '@mui/material/Checkbox';
-import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
-import DeleteIcon from '@mui/icons-material/Delete';
-import SaveIcon from '@mui/icons-material/Save';
-import EditIcon from '@mui/icons-material/Edit';
-import FilterListIcon from '@mui/icons-material/FilterList';
-import { visuallyHidden } from '@mui/utils';
 import { useEffect, useState } from 'react';
-import TableData from '@/types/table.interface';
+import { Order, TableData } from '@/types';
 import CircularProgress from '@mui/material/CircularProgress';
-import { getCampers, deleteCampers, updateCamper } from '@/lib/api';
+import { getCampers, updateCamper } from '@/lib/api';
 import SnackBar from '@/components/common/SnackBar';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import MenuItem from '@mui/material/MenuItem';
-import RegistrationFormData from '@/types/register.types';
+import EditCamper from '@/app/campers/elements/EditCamper';
+import { EnhancedTableHead, EnhancedTableToolbar } from '@/app/campers/elements/EnhancedTable';
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -48,8 +31,6 @@ function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   return 0;
 }
 
-type Order = 'asc' | 'desc';
-
 function getComparator<Key extends keyof TableData>(
   order: Order,
   orderBy: Key,
@@ -60,224 +41,6 @@ function getComparator<Key extends keyof TableData>(
   return order === 'desc'
     ? (a, b) => descendingComparator(a, b, orderBy)
     : (a, b) => -descendingComparator(a, b, orderBy);
-}
-
-interface HeadCell {
-  disablePadding: boolean;
-  id: keyof TableData;
-  label: string;
-  numeric: boolean;
-}
-
-const headCells: readonly HeadCell[] = [
-  {
-    id: 'name',
-    numeric: false,
-    disablePadding: true,
-    label: 'Name',
-  },
-  {
-    id: 'age',
-    numeric: true,
-    disablePadding: false,
-    label: 'Age',
-  },
-  {
-    id: 'gender',
-    numeric: true,
-    disablePadding: false,
-    label: 'Gender',
-  },
-  {
-    id: 'contact_number',
-    numeric: true,
-    disablePadding: false,
-    label: 'Contact #',
-  },
-  {
-    id: 'payment',
-    numeric: true,
-    disablePadding: false,
-    label: 'Payment',
-  },
-  {
-    id: 'tshirt_paid',
-    numeric: true,
-    disablePadding: false,
-    label: 'T-shirt Paid',
-  },
-  {
-    id: 'extra',
-    numeric: true,
-    disablePadding: false,
-    label: 'Extra',
-  },
-  {
-    id: 'remarks',
-    numeric: true,
-    disablePadding: false,
-    label: 'Remarks',
-  },
-  {
-    id: 'dp_date',
-    numeric: true,
-    disablePadding: false,
-    label: 'DP Date',
-  },
-  {
-    id: 'fp_date',
-    numeric: true,
-    disablePadding: false,
-    label: 'FP Date',
-  },
-  {
-    id: 'status',
-    numeric: true,
-    disablePadding: false,
-    label: 'Status',
-  },
-];
-
-interface EnhancedTableProps {
-  numSelected: number;
-  onRequestSort: (event: React.MouseEvent<unknown>, property: keyof TableData) => void;
-  onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  order: Order;
-  orderBy: string;
-  rowCount: number;
-}
-
-function EnhancedTableHead(props: EnhancedTableProps) {
-  const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } =
-    props;
-  const createSortHandler =
-    (property: keyof TableData) => (event: React.MouseEvent<unknown>) => {
-      onRequestSort(event, property);
-    };
-
-  return (
-    <TableHead>
-      <TableRow>
-        <TableCell padding="checkbox">
-          <Checkbox
-            color="primary"
-            indeterminate={numSelected > 0 && numSelected < rowCount}
-            checked={rowCount > 0 && numSelected === rowCount}
-            onChange={onSelectAllClick}
-            inputProps={{
-              'aria-label': 'select all desserts',
-            }}
-          />
-        </TableCell>
-        {headCells.map((headCell) => (
-          <TableCell
-            key={headCell.id}
-            align={headCell.numeric ? 'right' : 'left'}
-            padding={headCell.disablePadding ? 'none' : 'normal'}
-            sortDirection={orderBy === headCell.id ? order : false}
-          >
-            <TableSortLabel
-              active={orderBy === headCell.id}
-              direction={orderBy === headCell.id ? order : 'asc'}
-              onClick={createSortHandler(headCell.id)}
-            >
-              {headCell.label}
-              {orderBy === headCell.id ? (
-                <Box component="span" sx={visuallyHidden}>
-                  {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-                </Box>
-              ) : null}
-            </TableSortLabel>
-          </TableCell>
-        ))}
-      </TableRow>
-    </TableHead>
-  );
-}
-
-interface EnhancedTableToolbarProps {
-  numSelected: number;
-  selectedIds: string[];
-  setNotification: (notification: { open: boolean; message: string; severity: 'success' | 'error' }) => void;
-  onDelete: () => void;
-  onEdit: () => void;
-}
-
-function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
-  const { numSelected, selectedIds, setNotification, onDelete, onEdit } = props;
-  
-  return (
-    <Toolbar
-      sx={[
-        {
-          pl: { sm: 2 },
-          pr: { xs: 1, sm: 1 },
-        },
-        numSelected > 0 && {
-          bgcolor: (theme) =>
-            alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
-        },
-      ]}
-    >
-      {numSelected > 0 ? (
-        <>
-          <Typography
-            sx={{ flex: '1 1 100%' }}
-            color="inherit"
-            variant="subtitle1"
-            component="div"
-          >
-            {numSelected} selected
-          </Typography>
-          <Tooltip title="Edit">
-            <IconButton 
-              onClick={onEdit}
-              disabled={numSelected !== 1}
-            >
-              <EditIcon />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Delete">
-            <IconButton onClick={async () => {
-              const response = await deleteCampers(selectedIds);
-              if (response.status === 200) {
-                setNotification({
-                  open: true,
-                  message: response.message,
-                  severity: 'success'
-                });
-                onDelete();
-              }
-            }}>
-              <DeleteIcon />
-            </IconButton>
-          </Tooltip>
-        </>
-      ) : (
-        <Typography
-          sx={{ flex: '1 1 100%' }}
-          variant="h6"
-          id="tableTitle"
-          component="div"
-        >
-          Campers
-        </Typography>
-      )}
-      {numSelected > 0 ? (
-        <Tooltip title="Filter list">
-          <IconButton>
-            <FilterListIcon />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip title="Filter list">
-          <IconButton>
-            <FilterListIcon />
-          </IconButton>
-        </Tooltip>
-      )}
-    </Toolbar>
-  );
 }
 
 const Campers = () => {
@@ -398,24 +161,44 @@ const Campers = () => {
     setEditingCamper(null);
   };
 
-  const handleEditSave = async (id: string, data: RegistrationFormData) => {
-    // TODO: Implement your edit API call here
+  const handleEditSave = async (id: string, data: TableData) => {
     try {
+      setLoading(true);
       const response = await updateCamper(id, data);
+ 
       if (response.status === 200) {
+        // Update the camper data locally
+        setCampers(prevCampers => prevCampers.map(camper => 
+          camper.id === parseInt(id) ? {
+            ...camper,
+            name: data.name || '',
+            age: data.age || 0,
+            gender: data.gender || '',
+            contact_number: data.contact_number || '',
+            payment: data.payment || 0,
+            tshirt_paid: data.tshirt_paid || false,
+            extra: data.extra || 0,
+            remarks: data.remarks || '',
+            dp_date: data.dp_date || new Date(),
+            fp_date: data.fp_date || new Date(),
+            status: data.status || ''
+          } : camper
+        ));
+
         setNotification({
           open: true,
           message: 'Camper updated successfully',
           severity: 'success'
         });
-        fetchCampers();
       }
     } catch (error) {
       setNotification({
         open: true,
-        message: `sadsss`,
+        message: `${error}`,
         severity: 'error'
       });
+    } finally {
+      setLoading(false);
     }
     handleEditClose();
   };
@@ -541,100 +324,14 @@ const Campers = () => {
         control={<Switch checked={dense} onChange={handleChangeDense} />}
         label="Dense padding"
       />
-
-      <Dialog open={editModalOpen} onClose={handleEditClose} fullWidth maxWidth="md">
-        <DialogTitle>Edit Camper</DialogTitle>
-        <DialogContent>
-          {editingCamper && (
-            <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <TextField
-                label="Name"
-                required
-                fullWidth
-                value={editingCamper.name}
-                onChange={(e) => setEditingCamper({ ...editingCamper, name: e.target.value })}
-              />
-              <TextField
-                label="Age"
-                required
-                type="number"
-                fullWidth
-                value={editingCamper.age}
-                onChange={(e) => setEditingCamper({ ...editingCamper, age: parseInt(e.target.value) })}
-              />
-              <TextField
-                label="Gender"
-                required
-                select
-                fullWidth
-                value={editingCamper.gender}
-                onChange={(e) => setEditingCamper({ ...editingCamper, gender: e.target.value })}
-              >
-                <MenuItem value="male">Male</MenuItem>
-                <MenuItem value="female">Female</MenuItem>
-              </TextField>
-              <TextField
-                label="Contact Number"
-                required
-                fullWidth
-                value={editingCamper.contact_number}
-                onChange={(e) => setEditingCamper({ ...editingCamper, contact_number: e.target.value })}
-              />
-              <TextField
-                label="Payment Status"
-                required
-                select
-                fullWidth
-                value={editingCamper.status}
-                onChange={(e) => setEditingCamper({ ...editingCamper, status: e.target.value })}
-              >
-                <MenuItem value="DP">Downpayment</MenuItem>
-                <MenuItem value="FP">Full Payment</MenuItem>
-              </TextField>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={editingCamper.tshirt_paid}
-                    onChange={(e) => setEditingCamper({ ...editingCamper, tshirt_paid: e.target.checked })}
-                  />
-                }
-                label="T-Shirt Paid"
-              />
-              <TextField
-                label="Extra Amount"
-                type="number"
-                fullWidth
-                value={editingCamper.extra || 0}
-                onChange={(e) => setEditingCamper({ ...editingCamper, extra: parseInt(e.target.value) })}
-              />
-              <TextField
-                label="Remarks"
-                fullWidth
-                multiline
-                rows={3}
-                value={editingCamper.remarks}
-                onChange={(e) => setEditingCamper({ ...editingCamper, remarks: e.target.value })}
-              />
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleEditClose} color="error">Cancel</Button>
-          <Button 
-            onClick={() => {
-              if (editingCamper?.id) {
-                handleEditSave(editingCamper.id.toString(), editingCamper);
-              }
-            }}
-            variant="contained" 
-            color="success"
-            startIcon={<SaveIcon />}
-            disabled={!editingCamper?.id}
-          >
-            Save Changes
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <EditCamper 
+        editModalOpen={editModalOpen}
+        handleEditClose={handleEditClose}
+        editingCamper={editingCamper}
+        setEditingCamper={setEditingCamper}
+        handleEditSave={handleEditSave}
+        loading={loading}
+      />
     </Box>
   );
 }

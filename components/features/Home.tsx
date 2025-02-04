@@ -9,7 +9,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import { getCampers } from '@/lib/api';
 import { useState, useEffect } from "react";
-import TableData  from "@/types/table.interface";
+import { TableData } from "@/types";
 
 const Home = () => {
     const [campers, setCampers] = useState<TableData[]>([]);

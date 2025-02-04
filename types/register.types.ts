@@ -1,4 +1,4 @@
-export default interface RegistrationFormData {
+export type RegistrationFormData = {
     name: string;
     nickname?: string;
     birthdate?: string;

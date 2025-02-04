@@ -1,23 +1,38 @@
 import supabase from "@/lib/supabase";
-import RegistrationFormData from "@/types/register.types";
-
-
-const fixPayment = 1500;
-
-function calculateExtra(payment: number) : number {
-
-    let extra = 0;
-    if (payment > fixPayment) {
-        extra = Math.abs(payment - fixPayment);
-    }
-    return extra
-}
-
-function isFullyPaid(payment: number) : boolean {
-    return payment >= fixPayment ? true : false;
-}
+import { RegistrationFormData } from "@/types";
+import { calculateExtra, isFullyPaid, fixPayment } from "@/lib/functions";
 
 export async function POST(req: Request) {
+    const formData = await req.json();
+    return await handleRegistration(formData);
+}
+
+export async function PUT(req: Request) {
+    const formData = await req.json();
+    const searchParams = new URL(req.url).searchParams;
+    const id = searchParams.get('id');
+
+    if (!id) {
+        return Response.json({ error: 'ID is required for updates' }, { status: 400 });
+    }
+
+    return await handleRegistration(formData, id);
+}
+
+async function handleRegistration(
+    formData: {
+        name: string,
+        nickname: string,
+        birthdate: string,
+        gender: string,
+        contact_number: string,
+        payment: number,
+        sponsor_amount: number,
+        tshirt_paid: boolean,
+        remarks: string
+    }, 
+    id?: string
+) {
     const { 
         name, 
         nickname,
@@ -28,7 +43,7 @@ export async function POST(req: Request) {
         sponsor_amount,
         tshirt_paid,
         remarks,
-    } = await req.json();
+    } = formData;
 
     const extra = calculateExtra(payment);
     const fullyPaid = isFullyPaid(payment);
@@ -56,7 +71,17 @@ export async function POST(req: Request) {
         reqBody.dp_date = new Date();
     }
 
-    const data = await supabase.from('youth').insert(reqBody);
+    let data;
+    if (id) {
+        data = await supabase
+            .from('youth')
+            .update(reqBody)
+            .eq('id', id);
+    } else {
+        data = await supabase
+            .from('youth')
+            .insert(reqBody);
+    }
 
-    return Response.json(data);
+    return Response.json({data: data, status: 200});
 }

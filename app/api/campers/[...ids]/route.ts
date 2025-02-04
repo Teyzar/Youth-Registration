@@ -14,7 +14,7 @@ export async function DELETE(
       .in('id', numericIds);
 
     if (error) {
-      return Response.json({ error: `sad2` }, { status: 400 });
+      return Response.json({ error: `${error}` }, { status: 400 });
     }
 
     return Response.json(
@@ -22,7 +22,7 @@ export async function DELETE(
     );
   } catch (error) {
     return Response.json(
-      { error: `sad`},
+      { error: `${error}`},
       { status: 500 }
     );
   }

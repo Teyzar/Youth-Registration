@@ -1,4 +1,4 @@
-export default interface TableData {
+export type TableData = {
     id: number;
     name: string;
     age: number;
