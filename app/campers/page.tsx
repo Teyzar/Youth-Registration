@@ -44,6 +44,7 @@ const Campers = () => {
   const [selected, setSelected] = React.useState<readonly number[]>([]);
   const [campers, setCampers] = React.useState<TableData[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [loadingDelete, setLoadingDelete] = React.useState(false);
   const [notification, setNotification] = useState({
     open: false,
     message: '',
@@ -106,15 +107,25 @@ const Campers = () => {
         }
         break;
       case 'delete':
-        const response = await deleteCampers(selected.map(String));
-        if (response.status === 200) {
+        try {
+          setLoadingDelete(true);
+          const response = await deleteCampers(selected.map(String));
+          if (response.status === 200) {
+            setNotification({
+              open: true,
+              message: response.message,
+              severity: 'success'
+            });
+          }
+          setAlertDialog(prev => ({ ...prev, open: false }));
+        } catch (error) {
           setNotification({
             open: true,
-            message: response.message,
-            severity: 'success'
+            message: `${error}`,
+            severity: 'error'
           });
-
-          setAlertDialog(prev => ({ ...prev, open: false}));
+        } finally {
+          setLoadingDelete(false);
         }
         break;
       default:
@@ -350,7 +361,7 @@ const Campers = () => {
         message={alertDialog.message}
         buttons={[
           { title: 'Cancel', onClick: () => setAlertDialog(prev => ({ ...prev, open: false })), color: 'primary'},
-          { title: 'Confirm', onClick: () => {setLoading(true);}, color: 'error', startIcon: loading ? <CircularProgress size={12} /> : null, disabled: loading}
+          { title: 'Confirm', onClick: () => {handleAction('delete')}, color: 'error', startIcon: loadingDelete ? <CircularProgress size={12} /> : null, disabled: loadingDelete}
         ]}
       />
     </Box>
