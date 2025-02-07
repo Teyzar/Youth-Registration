@@ -3,11 +3,10 @@ import { calculateExtra, fixPayment, isFullyPaid } from "@/lib/functions";
 import { RegistrationFormData } from "@/types";
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: { ids: string[] } }
+  context: { params: Promise<{ ids: string[] }> }
 ) {
   try {
-    const { ids } = await params;
+    const { ids } = await context.params;
     const numericIds = ids[0].split(',').map(id => parseInt(id));
 
     console.log('numericIds', numericIds);
@@ -16,7 +15,7 @@ export async function DELETE(
       .from('youth')
       .delete()
       .in('id', numericIds)
-      .select(); // Add .select() to return the deleted records
+      .select();
     
     console.log('error', data);
 
@@ -25,7 +24,7 @@ export async function DELETE(
     }
 
     return Response.json(
-      { message: 'Successfully Deleted!', status: 200  },
+      { message: 'Successfully Deleted!', status: 200 }
     );
   } catch (error) {
     return Response.json(
