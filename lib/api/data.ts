@@ -7,8 +7,9 @@ export async function getCampers() {
 }
 
 export async function deleteCampers(ids: string[]) {
-    const response = await fetch(`/api/campers/${ids}`, {
+    const response = await fetch(`/api/campers`, {
         method: 'DELETE',
+        body: JSON.stringify({ ids }),
     });
     const camper = await response.json();
     return camper;

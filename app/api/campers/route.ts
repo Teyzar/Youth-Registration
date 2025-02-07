@@ -9,6 +9,8 @@ export async function GET() {
 
     data?.forEach(async (item) => {
         const payment = item.dp_amount > 0 ? item.dp_amount : item.fp_amount;
+        console.log(item.fp_amount);
+        console.log(item.dp_amount);
         const dp_date = item.dp_date;
         const fp_date = item.fp_date;
         campers.push({
@@ -32,4 +34,14 @@ export async function GET() {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
     return NextResponse.json(campers);
+}
+
+export async function DELETE(request: Request) {
+    const { ids } = await request.json();
+    const { error } = await supabase.from('youth').delete().in('id', ids);
+    
+    if (error) {
+        return NextResponse.json({ error: error.message, status: 500 });
+    }
+    return NextResponse.json({ message: "Successfully Deleted!", status: 200 });
 }

@@ -2,38 +2,6 @@ import supabase from "@/lib/supabase";
 import { calculateExtra, fixPayment, isFullyPaid } from "@/lib/functions";
 import { RegistrationFormData } from "@/types";
 
-export async function DELETE(
-  context: { params: Promise<{ ids: string[] }> }
-) {
-  try {
-    const { ids } = await context.params;
-    const numericIds = ids[0].split(',').map(id => parseInt(id));
-
-    console.log('numericIds', numericIds);
-
-    const { data, error } = await supabase
-      .from('youth')
-      .delete()
-      .in('id', numericIds)
-      .select();
-    
-    console.log('error', data);
-
-    if (error) {
-      return Response.json({ error: `${error}` }, { status: 400 });
-    }
-
-    return Response.json(
-      { message: 'Successfully Deleted!', status: 200 }
-    );
-  } catch (error) {
-    return Response.json(
-      { error: `${error}`},
-      { status: 500 }
-    );
-  }
-}
-
 export async function PUT(req: Request) {
   const {
       name,
@@ -64,14 +32,24 @@ export async function PUT(req: Request) {
 
   if (extra > 0) {
       reqBody.extra = extra;
+  } else {
+      reqBody.extra = 0;
   }
 
   if (fullyPaid) {
       reqBody.fp_amount = fixPayment;
       reqBody.fp_date = new Date();
+
+      reqBody.dp_amount = 0;
+      reqBody.dp_date = undefined;
   } else {
       reqBody.dp_amount = payment;
       reqBody.dp_date = new Date();
+
+      if (reqBody.fp_date) {
+          reqBody.fp_date = undefined;
+          reqBody.fp_amount = 0;
+      }
   }
 
   console.log(reqBody);

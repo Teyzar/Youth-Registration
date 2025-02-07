@@ -8,8 +8,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { deleteCampers, getCampers, registerCamper } from '@/lib/api';
 import SnackBar from '@/components/common/SnackBar';
 import { EnhancedTableHead, EnhancedTableToolbar, AlertDialog, EditCamper } from '@/app/campers/elements';
-
-
+import { isFullyPaid, fixPayment } from '@/lib/functions';
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -43,8 +42,11 @@ const Campers = () => {
   });
   const [selected, setSelected] = React.useState<readonly number[]>([]);
   const [campers, setCampers] = React.useState<TableData[]>([]);
-  const [loading, setLoading] = React.useState(true);
-  const [loadingDelete, setLoadingDelete] = React.useState(false);
+  const [loadingState, setLoadingState] = React.useState({
+    table: false,
+    delete: false,
+    saveChanges: false
+  });
   const [notification, setNotification] = useState({
     open: false,
     message: '',
@@ -78,8 +80,12 @@ const Campers = () => {
     }));
   };
 
-  const handleSelectAllClick = (checked: boolean) => {
-    setSelected(checked ? campers.map(n => n.id) : []);
+  const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.checked) {
+      setSelected(campers.map(n => n.id));
+    } else {
+      setSelected([]);
+    }
   };
 
   const handleClick = (id: number) => {
@@ -108,7 +114,7 @@ const Campers = () => {
         break;
       case 'delete':
         try {
-          setLoadingDelete(true);
+          setLoadingState(prev => ({ ...prev, delete: true }));
           const response = await deleteCampers(selected.map(String));
           if (response.status === 200) {
             setNotification({
@@ -116,6 +122,7 @@ const Campers = () => {
               message: response.message,
               severity: 'success'
             });
+            setCampers(prevCampers => prevCampers.filter(camper => !selected.includes(camper.id)));
           }
           setAlertDialog(prev => ({ ...prev, open: false }));
         } catch (error) {
@@ -125,7 +132,7 @@ const Campers = () => {
             severity: 'error'
           });
         } finally {
-          setLoadingDelete(false);
+          setLoadingState(prev => ({ ...prev, delete: false }));
         }
         break;
       default:
@@ -135,7 +142,7 @@ const Campers = () => {
 
   const fetchCampers = async () => {
     try {
-      setLoading(true);
+      setLoadingState(prev => ({ ...prev, table: true }));
       const data = await getCampers();
       setCampers(data);
     } catch (error) {
@@ -146,7 +153,7 @@ const Campers = () => {
       });
       console.error(error);
     } finally {
-      setLoading(false);
+      setLoadingState(prev => ({ ...prev, table: false }));
       setSelected([]);
     }
   };
@@ -172,6 +179,8 @@ const Campers = () => {
   };
 
   const handleUpdateCampers = (data: TableData) => {
+    const payment = isFullyPaid(data.payment) ? fixPayment : data.payment;
+    
     setCampers(prevCampers => prevCampers.map(camper => 
       camper.id === data.id ? {
         ...camper,
@@ -179,12 +188,12 @@ const Campers = () => {
         age: data.age || 0,
         gender: data.gender || '',
         contact_number: data.contact_number || '',
-        payment: data.payment || 0,
+        payment: payment,
         tshirt_paid: data.tshirt_paid || false,
         extra: data.extra || 0,
         remarks: data.remarks || '',
-        dp_date: data.dp_date || new Date(),
-        fp_date: data.fp_date || new Date(),
+        dp_date: data.dp_date,
+        fp_date: data.fp_date,
         status: data.status || ''
       } : camper
     ));
@@ -200,7 +209,7 @@ const Campers = () => {
 
   const handleEditSave = async (id: string, data: TableData) => {
     try {
-      setLoading(true);
+      setLoadingState(prev => ({ ...prev, saveChanges: true }));
       const response = await registerCamper(data, 'PUT', `id=${id}`);
  
       if (response.status === 200) {
@@ -219,7 +228,7 @@ const Campers = () => {
         severity: 'error'
       });
     } finally {
-      setLoading(false);
+      setLoadingState(prev => ({ ...prev, saveChanges: false }));
     }
     setEditState(prev => ({ ...prev, modalOpen: false, camper: null }));
   };
@@ -252,12 +261,12 @@ const Campers = () => {
               numSelected={selected.length}
               order={tableState.order}
               orderBy={tableState.orderBy}
-              onSelectAllClick={() => handleSelectAllClick(true)}
+              onSelectAllClick={handleSelectAllClick}
               onRequestSort={(event: React.MouseEvent<unknown>, property: keyof TableData) => handleRequestSort(property)}
               rowCount={campers.length}
             />
             <TableBody>
-              {loading ? (
+              {loadingState.table ? (
                 <TableRow>
                   <TableCell colSpan={11} align="center" sx={{ py: 3 }}>
                     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -352,7 +361,7 @@ const Campers = () => {
         editingCamper={editState.camper}
         setEditingCamper={(camper) => setEditState(prev => ({ ...prev, camper }))}
         handleEditSave={handleEditSave}
-        loading={loading}
+        loading={loadingState.saveChanges}
       />
       <AlertDialog 
         open={alertDialog.open}
@@ -361,7 +370,7 @@ const Campers = () => {
         message={alertDialog.message}
         buttons={[
           { title: 'Cancel', onClick: () => setAlertDialog(prev => ({ ...prev, open: false })), color: 'primary'},
-          { title: 'Confirm', onClick: () => {handleAction('delete')}, color: 'error', startIcon: loadingDelete ? <CircularProgress size={12} /> : null, disabled: loadingDelete}
+          { title: 'Confirm', onClick: () => {handleAction('delete')}, color: 'error', startIcon: loadingState.delete ? <CircularProgress size={12} /> : null, disabled: loadingState.delete}
         ]}
       />
     </Box>

@@ -8,7 +8,7 @@ export type TableData = {
     tshirt_paid: boolean;
     extra: number;
     remarks: string;
-    dp_date: Date;
-    fp_date: Date;
+    dp_date: Date | null;
+    fp_date: Date | null;
     status: string;
 }

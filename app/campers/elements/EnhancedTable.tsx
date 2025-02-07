@@ -179,12 +179,12 @@ export function EnhancedTableHead(props: EnhancedTableProps) {
                 onClick={onEdit}
                 disabled={numSelected !== 1}
               >
-                <EditIcon />
+                <EditIcon color='primary' />
               </IconButton>
             </Tooltip>
             <Tooltip title="Delete">
               <IconButton onClick={onDelete}>
-                <DeleteIcon />
+                <DeleteIcon color='error'/>
               </IconButton>
             </Tooltip>
           </>
@@ -200,7 +200,7 @@ export function EnhancedTableHead(props: EnhancedTableProps) {
         )}
         {numSelected > 0 ? (
           <Tooltip title="Filter list">
-            <IconButton>
+            <IconButton disabled>
               <FilterListIcon />
             </IconButton>
           </Tooltip>

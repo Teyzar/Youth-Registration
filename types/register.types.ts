@@ -9,8 +9,8 @@ export type RegistrationFormData = {
     extra?: number;
     dp_amount?: number;
     fp_amount?: number;
-    dp_date?: Date;
-    fp_date?: Date;
+    dp_date?: Date | null;
+    fp_date?: Date | null;
     sponsor_amount?: number;
     remarks?: string;
     user_id?: string;

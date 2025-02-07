@@ -34,6 +34,12 @@ const Register = () => {
                     message: 'Registration successful!',
                     severity: 'success'
                 });
+            } else {
+                setNotification({
+                    open: true,
+                    message: response.error,
+                    severity: 'error'
+                });
             }
         } catch (error) {
             setNotification({

@@ -76,6 +76,8 @@ async function handleRegistration(
 
     if (extra > 0) {
         reqBody.extra = extra;
+    } else {
+        reqBody.extra = 0;
     }
 
     if (age) {
@@ -85,9 +87,19 @@ async function handleRegistration(
     if (fullyPaid) {
         reqBody.fp_amount = fixPayment;
         reqBody.fp_date = new Date();
+
+        if (id) {
+            reqBody.dp_amount = 0;
+            reqBody.dp_date = null;
+        }
     } else {
         reqBody.dp_amount = payment;
         reqBody.dp_date = new Date();
+        
+        if (id) {
+            reqBody.fp_date = null;
+            reqBody.fp_amount = 0;
+        }
     }
     // For testing purposes only
     let data;
@@ -101,6 +113,10 @@ async function handleRegistration(
         data = await supabase
             .from('youth')
             .insert(reqBody);
+    }
+
+    if (data.error) {
+        return Response.json({ error: data.error.message, status: data.status});
     }
 
     return Response.json({data: data, status: 200});
