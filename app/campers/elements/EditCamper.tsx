@@ -88,7 +88,7 @@ const EditCamper = ({editModalOpen, handleEditClose, editingCamper, setEditingCa
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleEditClose} color="error">Cancel</Button>
+          <Button onClick={handleEditClose} color="error" variant="outlined">Cancel</Button>
           <Button 
             loading={loading}
             loadingPosition="start"
@@ -99,7 +99,7 @@ const EditCamper = ({editModalOpen, handleEditClose, editingCamper, setEditingCa
                 handleEditSave(editingCamper.id.toString(), editingCamper);
               }
             }}
-            variant="contained" 
+            variant="outlined" 
             color="success"
             startIcon={<SaveIcon />}
             disabled={!editingCamper?.id}

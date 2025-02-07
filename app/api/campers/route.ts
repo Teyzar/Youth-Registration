@@ -4,7 +4,7 @@ import { TableData } from "@/types";
 
 export async function GET() {
     const { data, error } = await supabase.from('youth').select('*');
-
+    
     const campers: TableData[] = [];
 
     data?.forEach(async (item) => {

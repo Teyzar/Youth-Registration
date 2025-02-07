@@ -1,7 +1,7 @@
 export type RegistrationFormData = {
     name: string;
     nickname?: string;
-    birthdate?: string;
+    birthdate?: Date;
     gender?: string;
     contact_number?: string;
     payment?: number;
@@ -13,4 +13,5 @@ export type RegistrationFormData = {
     fp_date?: Date;
     sponsor_amount?: number;
     remarks?: string;
+    user_id?: string;
 }

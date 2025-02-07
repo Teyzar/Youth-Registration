@@ -4,13 +4,26 @@ import { calculateExtra, isFullyPaid, fixPayment } from "@/lib/functions";
 
 export async function POST(req: Request) {
     const formData = await req.json();
+    const {
+        data: { user },
+        error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+        console.error('Authentication error:', authError);
+        return Response.json(
+            { error: 'Authentication required' },
+            { status: 401 }
+        );
+    }
     return await handleRegistration(formData);
 }
 
 export async function PUT(req: Request) {
     const formData = await req.json();
-    const searchParams = new URL(req.url).searchParams;
-    const id = searchParams.get('id');
+    const id = req.url.split('?id=')[1];
+
+    console.log('id', id);
 
     if (!id) {
         return Response.json({ error: 'ID is required for updates' }, { status: 400 });
@@ -23,13 +36,14 @@ async function handleRegistration(
     formData: {
         name: string,
         nickname: string,
-        birthdate: string,
+        birthdate: Date,
         gender: string,
         contact_number: string,
         payment: number,
         sponsor_amount: number,
         tshirt_paid: boolean,
-        remarks: string
+        remarks: string,
+        age: number
     }, 
     id?: string
 ) {
@@ -37,6 +51,7 @@ async function handleRegistration(
         name, 
         nickname,
         birthdate,
+        age,
         gender,
         contact_number,
         payment,
@@ -63,6 +78,10 @@ async function handleRegistration(
         reqBody.extra = extra;
     }
 
+    if (age) {
+        reqBody.birthdate = new Date(new Date().getFullYear() - age, 0, 1);
+    }
+
     if (fullyPaid) {
         reqBody.fp_amount = fixPayment;
         reqBody.fp_date = new Date();
@@ -70,8 +89,9 @@ async function handleRegistration(
         reqBody.dp_amount = payment;
         reqBody.dp_date = new Date();
     }
-
+    // For testing purposes only
     let data;
+    
     if (id) {
         data = await supabase
             .from('youth')

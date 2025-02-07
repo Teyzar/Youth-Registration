@@ -1,25 +1,15 @@
 'use client'
 
 import * as React from 'react';
-import Box from '@mui/material/Box';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TablePagination from '@mui/material/TablePagination';
-import TableRow from '@mui/material/TableRow';
-import Typography from '@mui/material/Typography';
-import Paper from '@mui/material/Paper';
-import Checkbox from '@mui/material/Checkbox';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Switch from '@mui/material/Switch';
+import { Box, Table, TableBody, TableCell, TableContainer, TablePagination, TableRow, Typography, Paper, Checkbox, FormControlLabel, Switch } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Order, TableData } from '@/types';
 import CircularProgress from '@mui/material/CircularProgress';
-import { getCampers, updateCamper } from '@/lib/api';
+import { deleteCampers, getCampers, registerCamper } from '@/lib/api';
 import SnackBar from '@/components/common/SnackBar';
-import EditCamper from '@/app/campers/elements/EditCamper';
-import { EnhancedTableHead, EnhancedTableToolbar } from '@/app/campers/elements/EnhancedTable';
+import { EnhancedTableHead, EnhancedTableToolbar, AlertDialog, EditCamper } from '@/app/campers/elements';
+
+
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -44,12 +34,14 @@ function getComparator<Key extends keyof TableData>(
 }
 
 const Campers = () => {
-  const [order, setOrder] = React.useState<Order>('asc');
-  const [orderBy, setOrderBy] = React.useState<keyof TableData>('name');
+  const [tableState, setTableState] = React.useState({
+    order: 'asc' as Order,
+    orderBy: 'name' as keyof TableData,
+    page: 0,
+    rowsPerPage: 5,
+    dense: false
+  });
   const [selected, setSelected] = React.useState<readonly number[]>([]);
-  const [page, setPage] = React.useState(0);
-  const [dense, setDense] = React.useState(false);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [campers, setCampers] = React.useState<TableData[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [notification, setNotification] = useState({
@@ -57,8 +49,78 @@ const Campers = () => {
     message: '',
     severity: 'success' as 'success' | 'error'
   });
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [editingCamper, setEditingCamper] = useState<TableData | null>(null);
+  const [editState, setEditState] = useState({
+    modalOpen: false,
+    camper: null as TableData | null
+  });
+
+  const [alertDialog, setAlertDialog] = useState({
+    open: false,
+    title: '',
+    message: ''
+  });
+
+  const visibleRows = React.useMemo(() => {
+    const sortedData = [...campers].sort(getComparator(tableState.order, tableState.orderBy));
+    return sortedData.slice(
+      tableState.page * tableState.rowsPerPage,
+      tableState.page * tableState.rowsPerPage + tableState.rowsPerPage
+    );
+  }, [campers, tableState]);
+
+  const handleRequestSort = (property: keyof TableData) => {
+    const isAsc = tableState.orderBy === property && tableState.order === 'asc';
+    setTableState(prev => ({
+      ...prev,
+      order: isAsc ? 'desc' : 'asc',
+      orderBy: property
+    }));
+  };
+
+  const handleSelectAllClick = (checked: boolean) => {
+    setSelected(checked ? campers.map(n => n.id) : []);
+  };
+
+  const handleClick = (id: number) => {
+    setSelected(prev => {
+      const selectedIndex = prev.indexOf(id);
+      if (selectedIndex === -1) return [...prev, id];
+      return prev.filter(item => item !== id);
+    });
+  };
+
+  // const handleEditClick = () => {
+
+  // };
+
+  const handleAction = async (action: string) => {
+
+    switch (action) {
+      case 'edit':
+        if (selected.length === 1) {
+          const camperToEdit = campers.find(camper => camper.id === selected[0]);
+          setEditState({
+            modalOpen: true,
+            camper: camperToEdit || null
+          });
+        }
+        break;
+      case 'delete':
+        const response = await deleteCampers(selected.map(String));
+        if (response.status === 200) {
+          setNotification({
+            open: true,
+            message: response.message,
+            severity: 'success'
+          });
+
+          setAlertDialog(prev => ({ ...prev, open: false}));
+        }
+        break;
+      default:
+        break;
+    }
+  }
 
   const fetchCampers = async () => {
     try {
@@ -82,109 +144,57 @@ const Campers = () => {
     fetchCampers();
   }, []);
 
-  const handleRequestSort = (
-    event: React.MouseEvent<unknown>,
-    property: keyof TableData,
-  ) => {
-    const isAsc = orderBy === property && order === 'asc';
-    setOrder(isAsc ? 'desc' : 'asc');
-    setOrderBy(property);
-  };
-
-  const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.checked) {
-      const newSelected = campers.map((n) => n.id);
-      setSelected(newSelected);
-      return;
-    }
-    setSelected([]);
-  };
-
-  const handleClick = (event: React.MouseEvent<unknown>, id: number) => {
-    const selectedIndex = selected.indexOf(id);
-    let newSelected: readonly number[] = [];
-
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, id);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
-      );
-    }
-    setSelected(newSelected);
-  };
-
   const handleChangePage = (event: unknown, newPage: number) => {
-    setPage(newPage);
+    setTableState(prev => ({ ...prev, page: newPage }));
   };
 
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
+    setTableState(prev => ({
+      ...prev,
+      rowsPerPage: parseInt(event.target.value, 10),
+      page: 0
+    }));
   };
 
   const handleChangeDense = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setDense(event.target.checked);
+    setTableState(prev => ({ ...prev, dense: event.target.checked }));
   };
+
+  const handleUpdateCampers = (data: TableData) => {
+    setCampers(prevCampers => prevCampers.map(camper => 
+      camper.id === data.id ? {
+        ...camper,
+        name: data.name || '',
+        age: data.age || 0,
+        gender: data.gender || '',
+        contact_number: data.contact_number || '',
+        payment: data.payment || 0,
+        tshirt_paid: data.tshirt_paid || false,
+        extra: data.extra || 0,
+        remarks: data.remarks || '',
+        dp_date: data.dp_date || new Date(),
+        fp_date: data.fp_date || new Date(),
+        status: data.status || ''
+      } : camper
+    ));
+  }
 
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - campers.length) : 0;
-
-  const visibleRows = React.useMemo(
-    () =>
-      [...campers]
-        .sort(getComparator(order, orderBy))
-        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
-    [order, orderBy, page, rowsPerPage, campers],
-  );
+    tableState.page > 0 ? Math.max(0, (1 + tableState.page) * tableState.rowsPerPage - campers.length) : 0;
 
   const handleCloseNotification = () => {
       setNotification(prev => ({ ...prev, open: false }));
   };
 
-  const handleEditClick = () => {
-    if (selected.length === 1) {
-      const camperToEdit = campers.find(camper => camper.id === selected[0]);
-      setEditingCamper(camperToEdit || null);
-      setEditModalOpen(true);
-    }
-  };
-
-  const handleEditClose = () => {
-    setEditModalOpen(false);
-    setEditingCamper(null);
-  };
-
   const handleEditSave = async (id: string, data: TableData) => {
     try {
       setLoading(true);
-      const response = await updateCamper(id, data);
+      const response = await registerCamper(data, 'PUT', `id=${id}`);
  
       if (response.status === 200) {
         // Update the camper data locally
-        setCampers(prevCampers => prevCampers.map(camper => 
-          camper.id === parseInt(id) ? {
-            ...camper,
-            name: data.name || '',
-            age: data.age || 0,
-            gender: data.gender || '',
-            contact_number: data.contact_number || '',
-            payment: data.payment || 0,
-            tshirt_paid: data.tshirt_paid || false,
-            extra: data.extra || 0,
-            remarks: data.remarks || '',
-            dp_date: data.dp_date || new Date(),
-            fp_date: data.fp_date || new Date(),
-            status: data.status || ''
-          } : camper
-        ));
-
+        handleUpdateCampers(data);
         setNotification({
           open: true,
           message: 'Camper updated successfully',
@@ -200,7 +210,7 @@ const Campers = () => {
     } finally {
       setLoading(false);
     }
-    handleEditClose();
+    setEditState(prev => ({ ...prev, modalOpen: false, camper: null }));
   };
 
   return (
@@ -212,26 +222,27 @@ const Campers = () => {
       <SnackBar notification={notification} handleCloseNotification={handleCloseNotification}/>
       <Paper sx={{ 
         mb: 2,
+        mx: 'auto'
       }}>
         <EnhancedTableToolbar 
           numSelected={selected.length} 
-          selectedIds={selected.map(id => id.toString())} 
+          selectedIds={selected.map(String)} 
           setNotification={setNotification} 
-          onDelete={fetchCampers}
-          onEdit={handleEditClick}
+          onDelete={() => setAlertDialog({ open: true, title: 'Delete Campers', message: 'Are you sure you want to delete the selected campers?' })}
+          onEdit={() => handleAction('edit')}
         />
         <TableContainer>
           <Table
             sx={{ minWidth: 750 }}
             aria-labelledby="tableTitle"
-            size={dense ? 'small' : 'medium'}
+            size={tableState.dense ? 'small' : 'medium'}
           >
             <EnhancedTableHead
               numSelected={selected.length}
-              order={order}
-              orderBy={orderBy}
-              onSelectAllClick={handleSelectAllClick}
-              onRequestSort={handleRequestSort}
+              order={tableState.order}
+              orderBy={tableState.orderBy}
+              onSelectAllClick={() => handleSelectAllClick(true)}
+              onRequestSort={(event: React.MouseEvent<unknown>, property: keyof TableData) => handleRequestSort(property)}
               rowCount={campers.length}
             />
             <TableBody>
@@ -259,7 +270,7 @@ const Campers = () => {
                   return (
                     <TableRow
                       hover
-                      onClick={(event) => handleClick(event, row.id)}
+                      onClick={() => handleClick(row.id)}
                       role="checkbox"
                       aria-checked={isItemSelected}
                       tabIndex={-1}
@@ -301,7 +312,7 @@ const Campers = () => {
               {emptyRows > 0 && (
                 <TableRow
                   style={{
-                    height: (dense ? 33 : 53) * emptyRows,
+                    height: (tableState.dense ? 33 : 53) * emptyRows,
                   }}
                 >
                   <TableCell colSpan={6} />
@@ -314,23 +325,33 @@ const Campers = () => {
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
           count={campers.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
+          rowsPerPage={tableState.rowsPerPage}
+          page={tableState.page}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Paper>
       <FormControlLabel
-        control={<Switch checked={dense} onChange={handleChangeDense} />}
+        control={<Switch checked={tableState.dense} onChange={handleChangeDense} />}
         label="Dense padding"
       />
       <EditCamper 
-        editModalOpen={editModalOpen}
-        handleEditClose={handleEditClose}
-        editingCamper={editingCamper}
-        setEditingCamper={setEditingCamper}
+        editModalOpen={editState.modalOpen}
+        handleEditClose={() => setEditState(prev => ({ ...prev, modalOpen: false, camper: null }))}
+        editingCamper={editState.camper}
+        setEditingCamper={(camper) => setEditState(prev => ({ ...prev, camper }))}
         handleEditSave={handleEditSave}
         loading={loading}
+      />
+      <AlertDialog 
+        open={alertDialog.open}
+        onClose={() => setAlertDialog(prev => ({ ...prev, open: false }))}
+        title={alertDialog.title}
+        message={alertDialog.message}
+        buttons={[
+          { title: 'Cancel', onClick: () => setAlertDialog(prev => ({ ...prev, open: false })), color: 'primary'},
+          { title: 'Confirm', onClick: () => {setLoading(true);}, color: 'error', startIcon: loading ? <CircularProgress size={12} /> : null, disabled: loading}
+        ]}
       />
     </Box>
   );

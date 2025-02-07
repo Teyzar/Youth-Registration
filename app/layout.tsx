@@ -73,7 +73,7 @@ export default async function RootLayout({
                     overflow: 'hidden',
                     gap: 2,
                     padding: 3,
-                    marginLeft: { xs: 0, md: '350px' },
+                    // marginLeft: { xs: 0, md: '350px' },
                     transition: 'margin-left 0.3s ease',
                     position: 'relative',
                     '& > *': {

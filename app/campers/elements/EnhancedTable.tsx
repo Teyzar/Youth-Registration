@@ -4,7 +4,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { TableData, Order } from '@/types';
-import { deleteCampers } from '@/lib/api';
 import { visuallyHidden } from '@mui/utils';
 
 interface HeadCell {
@@ -150,7 +149,7 @@ export function EnhancedTableHead(props: EnhancedTableProps) {
   }
   
   export function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
-    const { numSelected, selectedIds, setNotification, onDelete, onEdit } = props;
+    const { numSelected, onDelete, onEdit } = props;
     
     return (
       <Toolbar
@@ -184,17 +183,7 @@ export function EnhancedTableHead(props: EnhancedTableProps) {
               </IconButton>
             </Tooltip>
             <Tooltip title="Delete">
-              <IconButton onClick={async () => {
-                const response = await deleteCampers(selectedIds);
-                if (response.status === 200) {
-                  setNotification({
-                    open: true,
-                    message: response.message,
-                    severity: 'success'
-                  });
-                  onDelete();
-                }
-              }}>
+              <IconButton onClick={onDelete}>
                 <DeleteIcon />
               </IconButton>
             </Tooltip>
