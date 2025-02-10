@@ -54,10 +54,10 @@ async function handleRegistration(
         age,
         gender,
         contact_number,
-        payment,
-        sponsor_amount,
-        tshirt_paid,
-        remarks,
+        payment = 0,
+        sponsor_amount = 0,
+        tshirt_paid = false,
+        remarks = '',
     } = formData;
 
     const extra = calculateExtra(payment);
@@ -103,7 +103,6 @@ async function handleRegistration(
     }
     // For testing purposes only
     let data;
-    
     if (id) {
         data = await supabase
             .from('youth')

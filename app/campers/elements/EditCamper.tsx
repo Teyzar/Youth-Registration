@@ -63,8 +63,14 @@ const EditCamper = ({editModalOpen, handleEditClose, editingCamper, setEditingCa
                 size="small"
                 required
                 fullWidth
-                value={editingCamper.payment}
-                onChange={(e) => setEditingCamper({ ...editingCamper, payment: parseInt(e.target.value) })}
+                value={editingCamper.payment ?? 0}
+                onChange={(e) => {
+                    const value = e.target.value;
+                    setEditingCamper({ 
+                        ...editingCamper, 
+                        payment: value ? parseInt(value) : 0 
+                    });
+                }}
               />
               <FormControlLabel
                 control={
@@ -81,7 +87,7 @@ const EditCamper = ({editModalOpen, handleEditClose, editingCamper, setEditingCa
                 fullWidth
                 multiline
                 rows={3}
-                value={editingCamper.remarks}
+                value={editingCamper.remarks ?? ''}
                 onChange={(e) => setEditingCamper({ ...editingCamper, remarks: e.target.value })}
               />
             </Box>

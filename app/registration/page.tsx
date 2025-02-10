@@ -19,6 +19,7 @@ const Register = () => {
     // Watch the values to use them in the Select components
     const genderValue = watch('gender');
     const tshirtValue = watch('tshirt_paid');
+    const paymentValue = watch('payment');
 
     const handleFormSubmit = async (formData: RegistrationFormData) => {
         setIsSubmitting(true);
@@ -156,19 +157,19 @@ const Register = () => {
                                     label="Payment"
                                     type="number"
                                     variant="outlined"
-                                    required
                                     size="small"
+                                    value={paymentValue ? parseInt(paymentValue.toString()) : 0 }
                                     {...register('payment')}
                                     sx={{ backgroundColor: 'background.paper' }}
                                 />
                             </Grid2>
 
                             <Grid2 size={{xs: 12, sm: 6}}>
-                                <FormControl fullWidth required size="small">
+                                <FormControl fullWidth size="small">
                                     <InputLabel>T-Shirt Paid</InputLabel>
                                     <Select
                                         label="T-Shirt Paid"
-                                        value={tshirtValue || ''}
+                                        value={tshirtValue || 'No'}
                                         {...register('tshirt_paid')}
                                         sx={{ backgroundColor: 'background.paper' }}
                                     >

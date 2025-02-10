@@ -238,11 +238,14 @@ const Campers = () => {
       display: 'flex',
       flexDirection: 'column',
       width: '100%',
+      overflowX: 'auto',
     }}>
       <SnackBar notification={notification} handleCloseNotification={handleCloseNotification}/>
       <Paper sx={{ 
         mb: 2,
-        mx: 'auto'
+        mx: 'auto',
+        width: '100%',
+        overflowX: 'auto',
       }}>
         <EnhancedTableToolbar 
           numSelected={selected.length} 
@@ -253,7 +256,7 @@ const Campers = () => {
         />
         <TableContainer>
           <Table
-            sx={{ minWidth: 750 }}
+            sx={{ minWidth: 750, width: '100%' }}
             aria-labelledby="tableTitle"
             size={tableState.dense ? 'small' : 'medium'}
           >
