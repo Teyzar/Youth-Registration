@@ -77,7 +77,7 @@ const Home = () => {
                     ))
                 ) : (
                     stats.map((stat, index) => (
-                        <Grid2 size={{xs: 12, sm: 6, md: 4}} key={index}>
+                        <Grid2 size={{xs: 12, sm: 6, md: 3}} key={index}>
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}

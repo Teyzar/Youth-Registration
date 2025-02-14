@@ -6,7 +6,7 @@ export default async function Home() {
   const token = (await cookies()).get('token')?.value;
   
   return (
-    <main className="flex items-center justify-center">
+    <main className="flex items-center justify-center w-full">
       {token ? <HomePage /> : <LoginPage />}
     </main>
   );
