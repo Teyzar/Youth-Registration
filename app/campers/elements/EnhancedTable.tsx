@@ -21,6 +21,12 @@ interface HeadCell {
       label: 'Name',
     },
     {
+      id: 'nickname',
+      numeric: false,
+      disablePadding: true,
+      label: 'Nickname',
+    },
+    {
       id: 'age',
       numeric: true,
       disablePadding: false,
@@ -80,6 +86,12 @@ interface HeadCell {
       disablePadding: false,
       label: 'Status',
     },
+    {
+      id: 'role',
+      numeric: true,
+      disablePadding: false,
+      label: 'Role',
+    },
   ];
   
 interface EnhancedTableProps {
@@ -103,7 +115,7 @@ export function EnhancedTableHead(props: EnhancedTableProps) {
     return (
       <TableHead>
         <TableRow>
-          <TableCell padding="checkbox">
+          <TableCell padding="checkbox" variant='head'>
             <Checkbox
               color="primary"
               indeterminate={numSelected > 0 && numSelected < rowCount}

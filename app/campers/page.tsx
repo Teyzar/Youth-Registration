@@ -185,8 +185,10 @@ const Campers = () => {
       camper.id === data.id ? {
         ...camper,
         name: data.name || '',
+        nickname: data.nickname || '',
         age: data.age || 0,
         gender: data.gender || '',
+        role: data.role || '',
         contact_number: data.contact_number || '',
         payment: payment,
         tshirt_paid: data.tshirt_paid || false,
@@ -237,15 +239,12 @@ const Campers = () => {
     <Box sx={{
       display: 'flex',
       flexDirection: 'column',
-      width: '100%',
       overflowX: 'auto',
     }}>
       <SnackBar notification={notification} handleCloseNotification={handleCloseNotification}/>
       <Paper sx={{ 
         mb: 2,
         mx: 'auto',
-        width: '100%',
-        overflowX: 'auto',
       }}>
         <EnhancedTableToolbar 
           numSelected={selected.length} 
@@ -318,6 +317,7 @@ const Campers = () => {
                       >
                         {row.name}
                       </TableCell>
+                      <TableCell align="right">{row.nickname}</TableCell>
                       <TableCell align="right">{row.age}</TableCell>
                       <TableCell align="right">{row.gender.charAt(0).toUpperCase() + row.gender.slice(1)}</TableCell>
                       <TableCell align="right">{row.contact_number}</TableCell>
@@ -328,6 +328,7 @@ const Campers = () => {
                       <TableCell align="right">{row.dp_date ? new Date(row.dp_date).toLocaleDateString() : ''}</TableCell>
                       <TableCell align="right">{row.fp_date ? new Date(row.fp_date).toLocaleDateString() : ''}</TableCell>
                       <TableCell align="right" sx={{ color: row.status === 'FP' ? 'green' : 'red' }}>{row.status}</TableCell>
+                      <TableCell align="right">{row.role}</TableCell>
                     </TableRow>
                   );
                 })

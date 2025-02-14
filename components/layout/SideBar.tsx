@@ -40,7 +40,7 @@ const SideBar = ({ isAuthenticated }: Props) => {
       sx={{
         width: 250,
         height: '100vh',
-        position: 'fixed',
+        position: 'relative',
         top: 0,
         left: 0,
         borderRight: `1px solid ${theme.palette.divider}`,

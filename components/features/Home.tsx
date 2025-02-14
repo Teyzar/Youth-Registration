@@ -21,17 +21,37 @@ const Home = () => {
             .finally(() => setLoading(false));
     }, []);
 
-    const totalMoney = campers.reduce((acc, camper) => acc + camper.payment, 0).toLocaleString('en-US', { style: 'currency', currency: 'PHP' });
-    const totalExtra = campers.reduce((acc, camper) => acc + camper.extra, 0).toLocaleString('en-US', { style: 'currency', currency: 'PHP' });
-    const totalFullyPaid = campers.filter(camper => camper.status === 'FP').length;
-    const totalUnpaid = campers.filter(camper => camper.status === 'DP').length;
-    
     const stats = [
-        { title: "Total Campers", value: campers.length, icon: <PeopleIcon sx={{ fontSize: 25 }}/>, color: "#4caf50" },
-        { title: "Total Money", value: totalMoney, icon: <AttachMoneyIcon sx={{ fontSize: 25 }}/>, color: "#2196f3" },
-        { title: "Total Extra", value: totalExtra, icon: <ShoppingCartIcon sx={{ fontSize: 25 }}/>, color: "#ff9800" },
-        { title: "Fully Paid", value: totalFullyPaid, icon: <CheckCircleIcon sx={{ fontSize: 25 }}/>, color: "#4caf50" },
-        { title: "Unpaid", value: totalUnpaid, icon: <ErrorIcon sx={{ fontSize: 25 }}/>, color: "#f50057" },
+        { 
+            title: "Total Campers", 
+            value: campers.length, 
+            icon: <PeopleIcon sx={{ fontSize: 25 }}/>, 
+            color: "#4caf50" 
+        },
+        { 
+            title: "Total Money", 
+            value: loading ? 0 : campers.reduce((acc, camper) => acc + camper.payment, 0).toLocaleString('en-US', { style: 'currency', currency: 'PHP' }), 
+            icon: <AttachMoneyIcon sx={{ fontSize: 25 }}/>, 
+            color: "#2196f3" 
+        },
+        { 
+            title: "Total Extra", 
+            value: loading ? 0 : campers.reduce((acc, camper) => acc + camper.extra, 0).toLocaleString('en-US', { style: 'currency', currency: 'PHP' }), 
+            icon: <ShoppingCartIcon sx={{ fontSize: 25 }}/>, 
+            color: "#ff9800" 
+        },
+        { 
+            title: "Fully Paid", 
+            value: campers.filter(camper => camper.status === 'FP').length, 
+            icon: <CheckCircleIcon sx={{ fontSize: 25 }}/>, 
+            color: "#4caf50" 
+        },
+        { 
+            title: "Unpaid", 
+            value: campers.filter(camper => camper.status === 'DP').length, 
+            icon: <ErrorIcon sx={{ fontSize: 25 }}/>, 
+            color: "#f50057" 
+        },
     ];
 
     return (
@@ -57,7 +77,7 @@ const Home = () => {
                     ))
                 ) : (
                     stats.map((stat, index) => (
-                        <Grid2 size={{xs: 12, sm: 6, md: 3}} key={index}>
+                        <Grid2 size={{xs: 12, sm: 6, md: 4}} key={index}>
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}

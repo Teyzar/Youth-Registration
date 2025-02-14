@@ -64,7 +64,7 @@ const Register = () => {
             <Box sx={{
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'center',
+                alignItems: 'start',
                 // minHeight: '100vh',
             }}>
                 <Paper elevation={1} sx={{ 

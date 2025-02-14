@@ -1,6 +1,7 @@
 export type TableData = {
     id: number;
     name: string;
+    nickname: string;
     age: number;
     gender: string;
     contact_number: string;
@@ -11,4 +12,5 @@ export type TableData = {
     dp_date: Date | null;
     fp_date: Date | null;
     status: string;
+    role: string;
 }

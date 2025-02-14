@@ -16,6 +16,7 @@ export async function GET() {
         campers.push({
             id: item.id,
             name: item.name,
+            nickname: item.nickname,
             age: new Date().getFullYear() - new Date(item.birthdate).getFullYear(),
             gender: item.gender,
             contact_number: item.contact_number,
@@ -26,6 +27,7 @@ export async function GET() {
             extra: item.extra,
             remarks: item.remarks,
             status: payment >= 1500 ? 'FP' : 'DP',
+            role: item.role,
         });
     });
 
